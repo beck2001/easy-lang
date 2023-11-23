@@ -1,0 +1,487 @@
+{% extends "template.html" %} {% block title %} {{project.name}} {% endblock %}
+{% load mathfilters %}
+{% block content %}
+
+<div class="detail_cards">
+
+  <div class="detail_card">
+    <div class="detail_card_title">
+      {{project.name}}
+            {% comment %} <span
+              class="badge badge-{% if project.role == 'manager' %}warning{% elif project.role == 'editor' %}primary{% elif project.role == 'translator' %}secondary{% endif %}">{{ project.role }}</span> {% endcomment %}
+            {%for role in project.roles%}
+            <span class="badge badge-{% if role == 'manager' %}warning{% elif role == 'editor' %}primary{% elif role == 'translator' %}secondary{% endif %}">{{ role }}</span>
+            {%endfor%}
+            </div>
+    <div class="detail_card_content">
+      <p><b>Описание: </b>{{project.description}}</p>
+      <p><b>Количество страниц: </b>{{project.total_pages_count}}</p>
+
+      <p><b>Проект создан: </b>{{project.created_at|date:"d.m.Y"}}</p>
+      <p><b>Дедлайн: </b>{{project.deadline|date:"d.m.Y"}} (Осталось {{project.deadline|timeuntil}})</p>
+      <p><b>Менеджер проекта: </b>{{project.manager}}</p>
+      <!-- count 1 + participants.editors, participants.translators -->
+      <!-- participants["manager"] = project.manager
+        participants["editors"] = editors
+        participants["translators"] = translators -->
+      <p><b>Количество участников: </b>
+        {% with editors_length=project.participants.editors|length %}
+        {% with translators_length=project.participants.translators|length %}
+        {% with total_length=editors_length|add:translators_length %}
+        {{ total_length|add:1}}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+      </p>
+      <p>
+        <b>Участники: </b>
+        <ul>
+          <li>{{project.manager}} @{{project.manager_tg_id}}
+            <span class="badge badge-warning">manager</span>
+          </li>
+          {% for editor in project.participants.editors %}
+          <li>{{editor}} @{{editor.tg_id}}
+            <span class="badge badge-primary">editor</span>
+          </li>
+          {% endfor %}
+          {% for translator in project.participants.translators %}
+          <li>{{translator}} @{{translator.tg_id}}
+            <span class="badge badge-secondary">translator</span>
+          </li>
+          {% endfor %}
+        </ul>
+
+      </p>
+      <p>
+        <b>Статус: </b>
+        {% if project.date_finished %}
+        <span class="badge badge-danger">Завершен</span>
+        {% else %}
+        <span class="badge badge-success">В процессе</span>
+        {% endif %}
+      </p>
+      <p>
+        <b>Прогресс: </b>
+
+        <span class="barcontent">Переведено страниц
+          ({{ project.translated_count }}/{{ project.total_pages_count }}):</span>
+        <!-- bar -->
+        <div class="progress">
+          <div class="progress-bar translated" role="progressbar" {% if project.translated_count == 0 %}
+            style="width: 0%; color:#000; background-color:#B84605" {% else %}
+            style="width: {{ project.translated_count|div:project.total_pages_count|mul:100|stringformat:".2f"  }}%; {% if project.translated_count|div:project.total_pages_count < 0.15 %}color:#000;{% elif project.translated_count|div:project.total_pages_count < 0.3 %}background-color:#B84605{% elif project.translated_count|div:project.total_pages_count < 0.8 %}background-color:#876D0F{% else %}background-color:#348F09{% endif %}"
+            {% endif %} aria-valuenow="{{ project.translated_count }}" aria-valuemin="0"
+            aria-valuemax="{{ project.total_pages_count }}">
+
+            {% if project.translated_count == 0 %}
+            0%
+            {% else %}
+            {{ project.translated_count|div:project.total_pages_count|mul:100|stringformat:".2f" |floatformat:2 }}%
+            {% endif %}
+          </div>
+        </div>
+    </div>
+    <div class="project-card-pr">
+      <span class="barcontent">Одобрено страниц({{ project.approved_count }}/{{ project.translated_count }})</span>
+      <div class="progress">
+        <div class="progress-bar approved" role="progressbar approved" {% if project.translated_count == 0 %}
+          style="width: 0%; color:#000; background-color:#B84605"
+          {% elif project.approved_count|div:project.translated_count < 0.15 %}
+          style="width: {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f"  }}%; color:#000; background-color:#B84605"
+          {% elif project.approved_count|div:project.translated_count < 0.3 %}
+          style="width: {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f"  }}%; color:#000; background-color:#B84605"
+          {% elif project.approved_count|div:project.translated_count < 0.6 %}
+          style="width: {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f"  }}%; color:#000; background-color:#FFC107"
+          {% elif project.approved_count|div:project.translated_count < 0.8 %}
+          style="width: {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f"  }}%; color:#000; background-color:#876D0F"
+          {% else %}
+          style="width: {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f"  }}%; color:#000; background-color:#348F09"
+          {% endif %} {% comment %}
+          style="width: {{ project.approved_count|div:project.translated_count }}%; {% if project.approved_count|div:project.translated_count < 0.15 %}color:#000{% endif %};{% if project.approved_count|div:project.translated_count < 0.3 %}background-color:#B84605{% elif project.approved_count|div:project.translated_count < 0.6 %}background-color:#FFC107{% elif project.approved_count|div:project.translated_count < 0.8 %}background-color:#876D0F{% else %}background-color:#348F09{% endif %}"
+          {% endcomment %} aria-valuenow="{{ project.approved_count }}" aria-valuemin="0"
+          aria-valuemax="{{ project.translated_count }}">
+
+          {% if project.translated_count == 0 %}
+          0%
+          {% else %}
+          {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f" |floatformat:2 }}%
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+{% if project.approved_count < project.total_pages_count %}
+  {% if "translator" in project.roles %}
+  <div class="detail_card">
+    <div class="detail_card_title">Добавить переведенные страницы</div>
+    <div class="detail_card_content">
+      <form action="{% url 'add_pages' project.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="pages_count">Количество страниц</label
+          >
+          {{ addTranslatedPagesForm.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Добавить</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+{% endif %}
+  {% comment %} add for editor to approve or disapprove {% endcomment %}
+  {% if "editor" in project.roles %}
+  <div class="detail_card">
+    <div class="detail_card_title">Модерация переводов</div>
+    <div class="detail_card_content">
+
+      {% if project.pages_to_approve|length == 0 %}
+      <p>Нет страниц для модерации</p>
+      {% endif %}
+      
+    
+    {% for page in project.pages_to_approve %}
+    {% comment %} row with date, translators, pages count and approve or disapprove {% endcomment %}
+    <div class="row">
+      <div class="col-12">
+        {% comment %} display all in 1 row {% endcomment %}
+        <div class="row">
+          <div class="col-2">
+            <p><b>Дата: </b>{{page.created_at}}</p>
+          </div>
+          <div class="col-3">
+            <p><b>Переводчик: </b>{{page.translator}}</p>
+          </div>
+          <div class="col-2">
+            <p><b>Количество страниц: </b>{{page.pages_count}}</p>
+          </div>
+          <div class="col-2">
+            <p><b>Комментарий: </b>{{page.comment}}</p>
+          </div>
+          <div class="col-3">
+            {% comment %} buttons in one row {% endcomment %}
+            <div class="row">
+              <div class="col">
+                <form action="{% url 'approve_pages_per_day' page.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success">Одобрить</button>
+                </form>
+              </div>
+              <div class="col">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#action-disapprove-commentModal" data-pages_per_day_id="{{page.id}}">Отклонить</button>
+              </div>
+
+              </div>
+          </div>
+      </div>
+      </div>
+    </div>
+    
+      
+    {% endfor %}
+      
+    </div>
+  </div>
+  {% endif %}
+  <div class="detail_card">
+    <div class="detail_card_title">Статистика выполненных страниц</div>
+    <div class="detail_card_content">
+      <canvas id="myChart" style="height:300px"></canvas>
+    </div>
+  </div>
+  <div class="detail_card">
+    <div class="detail_card_title">
+      История действий
+    </div>
+    <div class="detail_card_content">
+      <pre class="history_actions" style = "white-space: pre-wrap; display: block">
+      </pre>
+    </div>
+
+</div>
+
+<div class="modal modal-disapprove-comment" tabindex="-1" role="dialog" id="action-disapprove-commentModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="#" method="post">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Комментарий отмены перевода</h5>
+        </div>
+        <div class="modal-body form-group">
+          {% comment %} range of pages {% endcomment %}
+          <input type="text" class="form-control" id="disapprove-comment" name="comment" placeholder="Комментарий">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="col btn btn-danger" id="disapprove-comment-btn">Отправить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    
+
+    var pages_per_day = {{project.pages_per_day | safe}};
+    var approves = {{project.approves | safe}};
+    var disapproves = {{project.disapproves | safe}};
+  
+    var pages_per_days_by_id = {};
+    for (var i = 0; i < pages_per_day.length; i++) {
+      pages_per_days_by_id[pages_per_day[i].id] = pages_per_day[i];
+    }
+
+
+    // chronological order
+    var chronological = [];
+    for (var i = 0; i < pages_per_day.length; i++) {
+      pages_per_day[i].type = "pages_per_day";
+      chronological.push(pages_per_day[i]);
+    }
+    for (var i = 0; i < approves.length; i++) {
+      approves[i].type = "approve";
+      chronological.push(approves[i]);
+    }
+    for (var i = 0; i < disapproves.length; i++) {
+      disapproves[i].type = "disapprove";
+      chronological.push(disapproves[i]);
+    }
+    // desc "%d.%m.%Y %H:%m:%S" format
+    // Convert date strings to Date objects for proper comparison
+    chronological.forEach(function(item) {
+      item.dateObject = new Date(item.created_at.replace(/(\d{2}).(\d{2}).(\d{4}) (\d{2}):(\d{2}):(\d{2})/, "$3-$2-$1T$4:$5:$6"));
+    });
+
+    // Sort the list of dictionaries based on the dateObject property in descending order
+    chronological.sort(function(a, b) {
+      return b.dateObject - a.dateObject;
+    });
+
+    // Remove the temporary dateObject property
+    chronological.forEach(function(item) {
+      delete item.dateObject;
+    });
+
+    console.log(chronological);
+
+
+
+
+    var history_actions = "";
+    for (var i = 0; i < chronological.length; i++) {
+      var action = chronological[i];
+      var date_str = action.created_at
+      if (action.type == "pages_per_day") {
+        history_actions += "[" + date_str + "]: Переводчик “" + action.translator + "” перевел(-а) " + action.pages_count + " страниц. " + (action.comment ? "Комментарий: " + action.comment + "\n" : "\n")
+      } else if (action.type == "approve") {
+        
+        history_actions += "[" + date_str + "]: Одобрено Шэф-редактором “" + action.editor + {% if "editor" in project.roles %} "” Отмена действия: <a style='display:inline;color:red' href='/cancel_approve/" + action.id + "'>Отменить</a>" {% endif %} + " " + (action.comment ? "Комментарий: " + action.comment + "\n" : "\n");
+      } else if (action.type == "disapprove") {
+        history_actions += "[" + date_str + "]: Отклонено Шэф-редактором “" + action.editor + "” " + (action.comment ? "Комментарий: " + action.comment + "\n" : "\n");
+      }
+    }
+    $(".history_actions").html(history_actions);
+
+    
+    // x days y count
+    // key - day(without time)
+    // value - sum of pages_count for this day
+    pages_per_days_stat = [];
+
+    //remove pages which are disapproved
+    var tmpArr = [];
+    for (var i = 0; i < pages_per_day.length; i++) {
+      var page_per_day = pages_per_day[i];
+      var date = page_per_day.created_at.split(" ")[0];
+      var is_disapproved = false;
+      for (var j = 0; j < disapproves.length; j++) {
+        var disapprove = disapproves[j];
+        var disapprove_pages_per_day_id = disapprove.pages_per_day_id;
+        if (page_per_day.id == disapprove_pages_per_day_id) {
+          is_disapproved = true;
+          console.log(page_per_day);
+          break;
+        }
+      }
+      if (!is_disapproved) {
+        tmpArr.push(page_per_day);
+      }
+    }
+    pages_per_day = tmpArr;
+    console.log(pages_per_day);
+
+    for (var i = 0; i < pages_per_day.length; i++) {
+      var page_per_day = pages_per_day[i];
+      var date = page_per_day.created_at.split(" ")[0];
+      if (pages_per_days_stat[date] == undefined) {
+        pages_per_days_stat[date] = page_per_day.pages_count;
+      } else {
+        pages_per_days_stat[date] += page_per_day.pages_count;
+      }
+    }
+    // sum of pages_count for each day. get first day, then add value of all same days
+    var tmpArr = {};
+    var sum = 0;
+    for (var key in pages_per_days_stat) {
+        if (tmpArr[key] == undefined) {
+          tmpArr[key] = pages_per_days_stat[key];
+        } else {
+          tmpArr[key] += pages_per_days_stat[key];
+        }
+    }
+    pages_per_days_stat = tmpArr;
+    console.log(pages_per_days_stat);
+    
+    //between all days there are some days without pages. add them with 0 value, saving order and other days
+    var tmpArr = {};
+    var prev = 0;
+    var date_start = new Date({{project.created_at|date:"Y"}}, {{project.created_at|date:"m"}} - 1, {{project.created_at|date:"d"}});
+    // end is today
+    var date_end = new Date();
+    // date format dd.mm.yyyy
+    for (var d = date_start; d <= date_end; d.setDate(d.getDate() + 1)) {
+      var day = d.getDate();
+      var month = d.getMonth() + 1;
+      var year = d.getFullYear();
+      var date = day + "." + month + "." + year;
+      if (pages_per_days_stat[date] == undefined) {
+        tmpArr[date] = 0;
+      } else {
+        tmpArr[date] = pages_per_days_stat[date];
+      }
+    }
+    pages_per_days_stat = tmpArr;
+
+
+    prev = 0;
+    for (var key in pages_per_days_stat) {
+      pages_per_days_stat[key] += prev;
+      prev = pages_per_days_stat[key];
+    }
+
+    console.log(pages_per_days_stat);
+
+    {% comment %} cumulative in percent {% endcomment %}
+    var total_pages_count = {{project.total_pages_count}};
+    for (var key in pages_per_days_stat) {
+      pages_per_days_stat[key] = pages_per_days_stat[key] / total_pages_count * 100;
+    }
+
+
+    xValues = [...Object.keys(pages_per_days_stat)];
+    yValues = [...Object.values(pages_per_days_stat)];
+
+    {% comment %} for (var key in pages_per_days_stat) {
+      xValues.push(key);
+      yValues.push(pages_per_days_stat[key]);
+    } {% endcomment %}
+
+
+    
+
+    
+    const barColors = [];
+    // red if no pages(cur - prev)
+    prev = 0;
+    for (var i = 0; i < yValues.length; i++) {
+      console.log(yValues[i] - prev);
+      if(yValues[i] - prev == 0) {
+        barColors.push("#B84605");
+      } else {
+        barColors.push("#e5e5e5");
+      }
+      prev = yValues[i];
+    }
+
+
+    new Chart("myChart", {
+      type: "bar",
+      data: {
+        labels: xValues,
+        datasets: [{
+          data: yValues,
+          backgroundColor: barColors
+        }],
+
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+              callback: function (value, index, values) {
+                return value + "%";
+              }
+            }
+          }]
+        },
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: "Статистика выполненных страниц"
+        },
+        tooltips: {
+          callbacks: {
+              // current count of pages minus previous count of pages and percent data
+            label: (tooltipItem, data) => {
+              var label = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+              if (tooltipItem.index == 0) {
+                return label + " (" + (label / {{project.total_pages_count}} * 100).toFixed(2) + "%)";
+
+              } else {
+                var prev = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index - 1];
+                var cur_pages = label - prev;
+                cur_pages = {{project.total_pages_count}} * cur_pages / 100;
+                return cur_pages + " (" + (cur_pages / {{project.total_pages_count}} * 100).toFixed(2) + "%)";
+              }
+
+
+              
+            }
+          }
+        }
+      },
+    });
+
+
+    $("#action-disapprove-commentModal").on("show.bs.modal", function (event) {
+      var button = $(event.relatedTarget); // Button that triggered the modal
+      var pages_per_day_id = button.data("pages_per_day_id"); // Extract info from data-* attributes
+      var modal = $(this);
+      modal.find("form").attr("action", "{% url 'disapprove_pages_per_day' 0 %}".replace("0", pages_per_day_id));
+      var trans_pages = [];
+      var pages_count = pages_per_days_by_id[pages_per_day_id].pages_count;
+      var prev = 0;
+      {% comment %} from previous page to add {% endcomment %}
+      for (var i = 0; i < pages_per_day.length; i++) {
+        var page_per_day = pages_per_day[i];
+        if (page_per_day.id == pages_per_day_id) {
+          break;
+        }
+        prev += page_per_day.pages_count;
+      }
+      console.log(prev);
+
+      for (var i = prev+1;i<=pages_count+prev;i++){
+        trans_pages.push(i);
+      }
+      console.log(trans_pages);
+
+
+
+      
+      
+    });
+  });
+</script>
+
+</div>
+
+{% endblock %}

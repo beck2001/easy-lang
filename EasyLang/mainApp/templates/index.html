@@ -1,0 +1,302 @@
+{% extends "template.html" %} {% block title %} Проекты {% endblock %}
+{% load mathfilters %}
+
+{% block content %}
+<div class="modal modal-new-project" tabindex="-1" role="dialog" id="addTranslatorToProject">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {% comment %} AddNewProjectForm {% endcomment %}
+      <form method="POST" action="/appoint_translator" id="addTranslatorToProjectForm">
+        {% csrf_token %} 
+        {% comment %} hey {% endcomment %}
+        <div class="modal-header">
+          <h5 class="modal-title">Назначить Переводчика</h5>
+        </div>
+        <div class="modal-body form-group">
+          <div class="radio-group">
+
+          </div>
+        </div>
+        <div class="modal-footer">
+              <a id="cancelAddTranslator" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
+                Отмена
+              </a>
+              <a class="col btn btn-success submit-action-form" href="#" role="button">
+                Окей
+              </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal modal-new-project" tabindex="-1" role="dialog" id="deleteTranslatorFromProject">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {% comment %} AddNewProjectForm {% endcomment %}
+      <form method="POST" action="/dismiss_translator" id="deleteTranslatorFromProjectForm">
+        {% csrf_token %} 
+        {% comment %} hey {% endcomment %}
+        <div class="modal-header">
+          <h5 class="modal-title">Убрать Переводчика</h5>
+        </div>
+        <div class="modal-body form-group">
+          <div class="radio-group">
+
+          </div>
+        </div>
+        <div class="modal-footer">
+              <a id="cancelDeleteTranslator" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
+                Отмена
+              </a>
+              <a class="col btn btn-success submit-action-form" href="#" role="button">
+                Окей
+              </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal modal-new-project" tabindex="-1" role="dialog" id="addEditorToProject">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {% comment %} AddNewProjectForm {% endcomment %}
+      <form method="POST" action="/appoint_editor" id="addEditorToProjectForm">
+        {% csrf_token %} 
+        {% comment %} hey {% endcomment %}
+        <div class="modal-header">
+          <h5 class="modal-title">Назначить Шэф-редактора</h5>
+        </div>
+        <div class="modal-body form-group">
+          <div class="radio-group">
+
+          </div>
+        </div>
+        <div class="modal-footer">
+              <a id="cancelAddEditor" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
+                Отмена
+              </a>
+              <a class="col btn btn-success submit-action-form" href="#" role="button">
+                Окей
+              </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal modal-new-project" tabindex="-1" role="dialog" id="deleteEditorFromProject">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {% comment %} AddNewProjectForm {% endcomment %}
+      <form method="POST" action="/dismiss_editor" id="deleteEditorFromProjectForm">
+        {% csrf_token %} 
+        {% comment %} hey {% endcomment %}
+        <div class="modal-header">
+          <h5 class="modal-title">Убрать Шэф-редактора</h5>
+        </div>
+        <div class="modal-body form-group">
+          <div class="radio-group">
+
+          </div>
+        </div>
+        <div class="modal-footer">
+              <a id="cancelDeleteEditor" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
+                Отмена
+              </a>
+              <a class="col btn btn-success submit-action-form" href="#" role="button">
+                Окей
+              </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal modal-new-project" tabindex="-1" role="dialog" id="actionProjectModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      {% comment %} hey {% endcomment %}
+      <div class="modal-header">
+        <h5 class="modal-title">Действия</h5>
+      </div>
+      <div class="modal-body form-group">
+        <div class="modal-body-title-btn btn modal-action-btn" id="appointTranslatorBtn" data-dismiss="modal" data-toggle="modal" data-target="#addTranslatorToProject"><p>Назначить Переводчика</p></div>
+        <div class="modal-body-title-btn btn modal-action-btn" id="appointEditorBtn" data-dismiss="modal" data-toggle="modal" data-target="#addEditorToProject"><p>Назначить Шэф-Редактора</p></div>
+        <div class="modal-body-title-btn btn modal-action-btn" id="dismissTranslatorBtn" data-dismiss="modal" data-toggle="modal" data-target="#deleteTranslatorFromProject"><p>Убрать Переводчика</p></div>
+        <div class="modal-body-title-btn btn modal-action-btn" id="dismissEditorBtn" data-dismiss="modal" data-toggle="modal" data-target="#deleteEditorFromProject"><p>Убрать Шэф-Редактора</p></div>
+      </div>
+      <div class="modal-footer">
+        {% if is_manager == True or is_editor == True %}
+        <a id="endProjectBtn" class="col btn btn-success" href="#" role="button">
+          Завершить проект
+        </a>
+        <a id="deleteProjectBtn" class="col btn btn-danger" href="#" role="button">
+          Удалить проект
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="project_list">
+
+  {% for project in user_projects %}
+    <div class="container-project {%if project.deadline_over == True %} bg-red {% endif %} {% if project.finished_at %} bg-gray {% endif %}">
+      <i
+        class="fa fa-info-circle"
+        aria-hidden="true"
+        data-toggle="tooltip"
+        data-placement="bottom"
+        title="{{ project.description }}"
+      ></i>
+      <div class="project-card-heading">
+        <a href="{% url 'project_detail' project.id %}" ><span>{{ project.name }}</span></a>
+      </div>
+      <div class="project-card-content">
+        <div class="project-card-pr">
+          <span class="barcontent">Переведено страниц ({{ project.translated_count }}/{{ project.total_pages_count }}):</span>
+          <!-- bar -->
+          <div class="progress">
+            <div
+              class="progress-bar translated"
+              role="progressbar"
+              {% if project.translated_count == 0 %}
+                style="width: 0%; color:#000; background-color:#B84605"
+              {% else %}
+                style="width: {{ project.translated_count|div:project.total_pages_count|mul:100|stringformat:".2f"  }}%; {% if project.translated_count|div:project.total_pages_count < 0.15 %}color:#000;{% elif project.translated_count|div:project.total_pages_count < 0.3 %}background-color:#B84605{% elif project.translated_count|div:project.total_pages_count < 0.8 %}background-color:#876D0F{% else %}background-color:#348F09{% endif %}"
+              {% endif %}
+                aria-valuenow="{{ project.translated_count }}"
+              aria-valuemin="0"
+              aria-valuemax="{{ project.total_pages_count }}"
+            >
+            
+            {% if project.translated_count == 0 %}
+              0%
+            {% else %}
+              {{ project.translated_count|div:project.total_pages_count|mul:100|stringformat:".2f"  }}%
+            {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="project-card-pr">
+          <span class="barcontent">Одобрено страниц({{ project.approved_count }}/{{ project.translated_count }})</span>
+          <div class="progress">
+            <div
+              class="progress-bar approved"
+              role="progressbar approved"
+              
+              {% if project.translated_count == 0 %}
+              style="width: 0%; color:#000; background-color:#B84605"
+              {% elif project.approved_count|div:project.translated_count < 0.15 %}
+                style="width: {{ project.approved_count|div:project.translated_count|mul:100 |stringformat:".2f"  }}%; color:#000; background-color:#B84605"
+              {% elif project.approved_count|div:project.translated_count < 0.3 %}
+                style="width: {{ project.approved_count|div:project.translated_count|mul:100 |stringformat:".2f"   }}%; color:#000; background-color:#B84605"
+              {% elif project.approved_count|div:project.translated_count < 0.6 %}
+                style="width: {{ project.approved_count|div:project.translated_count|mul:100  |stringformat:".2f"  }}%; color:#000; background-color:#FFC107"
+              {% elif project.approved_count|div:project.translated_count < 0.8 %}
+                style="width: {{ project.approved_count|div:project.translated_count|mul:100 |stringformat:".2f"   }}%; color:#000; background-color:#876D0F"
+              {% else %}
+                style="width: {{ project.approved_count|div:project.translated_count|mul:100 |stringformat:".2f"   }}%; color:#000; background-color:#348F09"
+              {% endif %}
+                
+              aria-valuenow="{{ project.approved_count }}"
+              aria-valuemin="0"
+              aria-valuemax="{{ project.translated_count }}"
+            >
+            
+            {% if project.translated_count == 0 %}
+              0%
+            {% else %}
+              {{ project.approved_count|div:project.translated_count|mul:100|stringformat:".2f"  }}%
+            {% endif %}
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      {% comment %} manager or editor {% endcomment %}
+      {% if project.is_finished != True %}
+      {% if project.role == "manager" or project.role == "editor" %}
+      <button class="project-action" data-id="{{ project.id }}" data-toggle="modal" data-target="#actionProjectModal">Действия</button>
+      {% endif %}
+      {% endif %}
+    </div>
+  {% endfor %}
+  
+</div>
+<script>
+  $(document).on("click", ".project-action", function () {
+     var projectId = $(this).data('id');
+     $(".modal-action-btn").data("id", projectId);
+     $("#endProjectBtn").attr("href", "/end_project?project_id="+projectId);
+     $("#deleteProjectBtn").attr("href", "/delete_project?project_id="+projectId);
+     // As pointed out in comments, 
+     // it is unnecessary to have to manually call the modal.
+     // $('#addBookDialog').modal('show');
+  });
+  $(document).on("click", ".modal-action-btn", function (){
+    let url = "";
+    let projectId = $(this).data("id");
+    let targ = $(this).data("target")
+    if($(this).attr("id") == "appointTranslatorBtn"){
+      url = "/free_translators_list?project_id=" + projectId;
+    }else if($(this).attr("id") == "appointEditorBtn"){
+      url = "/free_editors_list?project_id=" + projectId;
+    }else if($(this).attr("id") == "dismissTranslatorBtn"){
+      url = "/project_translators_list?project_id=" + projectId;
+    }else if($(this).attr("id") == "dismissEditorBtn"){
+      url = "/project_editors_list?project_id=" + projectId;
+    }
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function (data) {
+          
+          $(targ+">.modal-dialog>.modal-content>form>.modal-body>.radio-group").empty();
+          data = JSON.parse(data);
+          for(let i=0;i<data.length;i++){
+            $(targ+">.modal-dialog>.modal-content>form>.modal-body>.radio-group").append("<div class='modal-body-title-btn btn submit-action-btn' data-id='"+data[i]["id"]+"' data-project='"+projectId+"' ><p>"+data[i]["name"]+" "+data[i]["surname"]+"</p></div>");
+          }
+        }
+        
+      });
+  });
+  $(document).on("click", ".submit-action-btn", function(){
+    // add class btn-selecteed
+
+    //delete all selected-btn class from other buttons, then add 
+    $(this).parent().find(".submit-action-btn").removeClass("btn-selected");
+    $(this).addClass("btn-selected");
+  
+    
+  });
+  $(document).on('click', ".submit-action-form", function(){
+    // create new form with post method
+    let form = $(this).parent().parent();
+    console.log(form);
+    let actionUrl = form.attr('action');
+    let data = {
+      "project_id": $(this).parent().parent().find(".modal-body>.radio-group>.btn-selected").data("project"),
+      "role_user_id": $(this).parent().parent().find(".modal-body>.radio-group>.btn-selected").data("id"),
+      "csrfmiddlewaretoken": $(this).parent().parent().find("input[name='csrfmiddlewaretoken']").val()
+    };
+    
+    // add data to form 
+    let submform = "<form method='POST' action='"+actionUrl+"' id='submitActionForm'>";
+    submform += "<input type='hidden' name='project_id' value='"+$(this).parent().parent().find(".modal-body>.radio-group>.btn-selected").data("project")+"'>";
+    submform += "<input type='hidden' name='role_user_id' value='"+$(this).parent().parent().find(".modal-body>.radio-group>.btn-selected").data("id")+"'>";
+    submform += "<input type='hidden' name='csrfmiddlewaretoken' value='"+$(this).parent().parent().find("input[name='csrfmiddlewaretoken']").val()+"'>";
+    submform += "</form>";
+    console.log(submform);
+    // submit form
+    $(submform).appendTo("body").submit();
+    {% comment %} $.ajax({
+        type: "POST",
+        url: actionUrl,
+        data: data,
+        success: function (data) {
+        }
+        
+      }); {% endcomment %}
+
+  });
+</script>
+{% endblock %}

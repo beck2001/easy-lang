@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <!-- if title not set make it app name -->
+    <title>EasyLang</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
+
+    <style>
+      html,
+      body {
+        min-height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .header {
+        height: fit-content;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+
+        color: #000;
+        font-family: Inter;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+
+        border: 0.2px solid #7a7a7a;
+        background: #fff;
+        box-shadow: 0px 4px 200px 0px rgba(0, 0, 0, 0.25);
+      }
+      .main-header {
+        color: #000;
+        font-family: Inter;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+      .right-header {
+        margin-right: 1rem;
+      }
+      .user_img {
+        height: 2.5rem;
+        width: 2.5rem;
+        border-radius: 50%;
+      }
+      .fa-angle-down {
+        font-size: 1.5rem;
+        color: #d9d9d9;
+      }
+
+      .fa-angle-down:hover {
+        cursor: pointer;
+        color: #000;
+      }
+
+      .content {
+        /* fill remaining height */
+        flex: 1;
+        height: 100%;
+
+        width: 100%;
+        display: flex;
+      }
+      .left-menu {
+        height: auto;
+        width: 20%;
+        border: 0.2px solid #999;
+        background: #fff;
+        box-shadow: 0px 4px 14px -6px rgba(0, 0, 0, 0.25);
+        border-top: none;
+        border-bottom: none;
+        display: flex;
+        flex-direction: column;
+      }
+      .menu-buttons {
+        height: 100%;
+        width: 100%;
+        padding-top: 1rem;
+      }
+      .menu-buttons > * {
+        height: 2.5rem;
+        width: auto;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        color: #000;
+        border-radius: 4px;
+        background: #fff;
+        margin: 0 0.5rem 1rem 0.5rem;
+        font-family: Inter;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+      }
+      .menu-buttons > .active {
+        color: #fff;
+        background: #000;
+      }
+      .menu-buttons > * > i {
+        margin-left: 1rem;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+      }
+      .menu-button > .badge {
+        margin-left: auto;
+      }
+      .menu-button > div{
+        margin-left: auto;
+      }
+      .new_project_btn {
+        height: 2.5rem;
+        width: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        border-radius: 4px;
+        border: 1px solid rgba(33, 130, 9, 0.99);
+        background: rgba(50, 144, 5, 0.99);
+        margin: 0 0.5rem 1rem 0.5rem;
+      }
+      .new_project_btn:hover {
+        cursor: pointer;
+      }
+      .new_project_btn > i {
+        margin-right: 0.5rem;
+        font-size: 1.5rem;
+      }
+      a {
+        text-decoration: none;
+        color: #000;
+      }
+      a:hover {
+        text-decoration: none;
+      }
+      .main-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #edecec;
+      }
+
+      .project_list {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        height: 100%;
+        padding: 1rem;
+        justify-content: flex-start;
+        /* vertical spacing */
+        align-content: start;
+      }
+      .container-project {
+        margin-top: 1rem;
+        margin-left: 1rem;
+        position: relative;
+        width: 300px;
+        height: 200px;
+        background: #fff;
+        border-radius: 0.5rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .fa.fa-info-circle {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+      }
+      .project-card-heading {
+        padding: 5px 5px 5px 20px;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+        color: #222;
+        text-align: center;
+        font-family: Inter;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+      }
+      .project-card-heading > span {
+        color: #222;
+        text-align: center;
+        font-family: Inter;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        width: auto;
+      }
+      .project-card-heading > i {
+        color: #acacac;
+        font-size: 1.5rem;
+      }
+      .project-card-heading > i:hover {
+        color: #000;
+        cursor: pointer;
+      }
+
+      .project-card-content {
+        display: flex;
+        flex-direction: column;
+        color: #7a7a7a;
+        text-align: center;
+        font-size: 0.8rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+      span.barcontent {
+        margin: 5px 0 5px 0;
+      }
+      .project-card-pr {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .progress-bar {
+        color: #fff;
+        text-align: right;
+        font-size: 0.8rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        padding-right: 5px;
+      }
+      .progress-bar.translated {
+        background-color: #876d0f;
+      }
+      .progress-bar.approved {
+        background-color: #348f09;
+      }
+      .project-action {
+        border-radius: 4px;
+        background: rgba(40, 40, 40, 0.99);
+        color: #fff;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        width: auto;
+        height: 2.5rem;
+        margin: 20px 20px 0 20px;
+      }
+      .modal{
+        display: none;
+      }
+      .modal.show{
+        display: flex!important;
+      }
+      .modal.fade {
+        display: none;
+      }
+      .modal.active {
+        display: block;
+      }
+
+      .detail_cards {
+        display: flex;
+        flex-direction: column;
+        width: auto;
+        padding: 1rem;
+        justify-content: flex-start;
+        /* vertical spacing */
+        align-content: start;
+        margin: 0 25px 0 25px;
+      }
+      .detail_card {
+        display: flex;
+        flex-direction: column;
+        border-radius: 5px;
+        background: #fff;
+        margin: 25px 0 25px 0;
+        padding: 15px 20px 15px 20px;
+        font-size: 1rem;
+      }
+      .detail_card_title{
+        width: auto;
+        font-size: 2rem;
+      }
+      .detail_card_content {
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+        
+      }
+      .history_actions{
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+        width: auto;
+        background: #D9D9D9;
+        padding: 10px;
+      }
+      .modal.modal-new-project.show{
+        display: flex !important;
+      }
+      .modal-dialog{
+        margin:auto;
+        width:287px;
+      }
+      .modal-footer{
+        justify-content: center;
+        border: none;
+        display: flex;
+        flex-direction: column;
+
+      }
+      .modal-body{
+        border: none;
+        padding: 1.5rem 1.5rem 0 1.5rem;
+      }
+      .modal-header{
+        justify-content: center;
+        border: none;
+      }
+      .new-project-input-text{
+        background: #E4E4E4;
+        height: 40px;
+      }
+      .new-project-input-text::placeholder{
+        color:#9E9E9E;
+        font-family: Montserrat;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+      }
+      h5.modal-title{
+        color: #000;
+        text-align: center;
+        font-size: 1.5rem;
+        font-style: normal;
+        font-weight: 800;
+        line-height: normal;
+      }
+      .errorlist{
+        display: none;
+      }
+      #messages{
+        {% comment %} on top of all {% endcomment %}
+        z-index: 9999;
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+
+      }
+      #messages > *{
+        margin: 0 0 5px 0;
+        padding: 0 0 0 1rem;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+      }
+      .modal-content{
+        width: fit-content;
+      }
+      .modal-body-title-btn{
+        color: #171717;
+        display: flex;
+        text-align: center;
+        font-family: Montserrat;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        border-radius: 5px;
+        background: #E4E4E4;
+        height:40px;
+        width: 100%;
+        border: 0px;
+        margin-bottom:15px;
+      }
+      .bg-red{
+        background: #FFCBCB;
+      }
+      .modal-body-title-btn:hover{
+        cursor: pointer;
+        background: #D9D9D9;
+      }
+      .modal-body-title-btn>p{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        margin:auto;
+        color: #171717;
+        font-size: 1.2rem;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        width: max-content;
+        padding: 0 1rem 0 1rem;
+      }
+      #myChart{
+        width: 100%;
+        height: 200px;
+      }
+
+      .modal-footer>a {
+        height: 2.5rem;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        border-radius: 4px;
+        margin: 0 0.5rem 1rem 0.5rem;
+      }
+      .modal-footer>a:hover {
+        cursor: pointer;
+      }
+      .btn-selected{
+        background: #747474;
+      }
+      .btn-selected:hover{
+        cursor: pointer;
+        background: #747474;
+      }
+      .bg-gray{
+        background: #E4E4E4;
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+
+    {% comment %} if messages error {% endcomment %}
+    {% if messages %}
+        <div id="messages">
+      {% for message in messages %}
+          <div class="alert 
+          {% if message.tags == 'success' %}
+            alert-success
+          {% elif message.tags == 'info' %}
+            alert-info
+          {% elif message.tags == 'warning' %}
+            alert-warning
+          {% elif message.tags == 'error' %}
+            alert-danger
+          {% endif %}
+          alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button
+              type="button"
+              class="close"
+              data-dismiss="alert"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+      {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="header">
+      <div class="main-header">
+        <a href="/">{% block title %}EasyLang{% endblock %}</a>
+      </div>
+      <div class="right-header">
+        <!-- image  -->
+        <img
+          src="{{ request.user.img_url }}"
+          class="user_img"
+          alt=""
+        />
+
+        <i
+          class="fas fa-angle-down"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        ></i>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <div class="dropdown-item">
+            <i class="fas fa-user"></i>
+            <span class="user-name"
+              >{{ request.user.name }} {{ request.user.surname }}</span
+            >
+          </div>
+          <div class="dropdown-item">
+            <i class="fas fa-id-card"></i>
+            <span class="user-name"
+              >ID: {{ request.user.tg_id }}</span>
+          </div>
+          <a class="dropdown-item" href="{% url 'logout' %}"
+            >Выйти из аккаунта</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="content">
+
+      {% comment %} if user has role manager {% endcomment %}
+      {% if is_manager == True %}
+      <div class="modal modal-new-project" tabindex="-1" role="dialog" id="createNewProjectModal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            {% comment %} AddNewProjectForm {% endcomment %}
+            <form method="POST" action="{% url 'add_new_project' %}">
+              {% csrf_token %}
+              <div class="modal-header">
+                <h5 class="modal-title" >Создание нового проекта</h5>
+              </div>
+              <div class="modal-body form-group">
+                {{ add_new_project_form.as_p }}
+              </div>
+              <div class="modal-footer">
+                  <button class="new_project_btn col">
+                    Создать
+                  </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      
+
+
+      <div class="left-menu">
+        <div class="menu-buttons">
+          <a href="/" class="menu-button {% if request.path == '/' %}active{% endif %}">
+            <i class="fas fa-layer-group"></i>
+            <span class="project-name">Проекты</span>
+          </a>
+
+          {% comment %} for in user_projects {% endcomment %}
+          {% for project in user_projects %}
+          <a href="{% url 'project_detail' project.id %}" class="menu-button {% if project.id|stringformat:"s" in request.path %}active{% endif %}">
+
+            <i class="fas fa-layer-group"></i>
+            <span class="project-name">{{ project.name }}</span>
+            {% comment %} <span
+              class="badge badge-{% if project.role == 'manager' %}warning{% elif project.role == 'editor' %}primary{% elif project.role == 'translator' %}secondary{% endif %}"
+              >{{ project.role }}</span> {% endcomment %}
+            <div style="margin-right: 1rem;"> 
+              {% for role in project.roles%}
+                  <span
+                    class="badge badge-{% if role == 'manager' %}warning{% elif role == 'editor' %}primary{% elif role == 'translator' %}secondary{% endif %}"
+                    >{{role}}</span>
+              {% endfor %}</div>
+
+          </a>
+          {% endfor %}
+        </div>
+        {% if is_manager == True %}
+          <button class="new_project_btn" data-toggle="modal" data-target="#createNewProjectModal">
+            <i class="fas fa-plus-circle"></i>
+            Новый проект
+          </button>
+        {% endif %}
+      </div>
+
+      <div class="main-content">{% block content %} {% endblock %}</div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script>
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+      });
+      
+    </script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
