@@ -481,6 +481,10 @@ def appoint_editor(request):
     if request.method == "POST":
         project_id = request.POST.get('project_id')
         editor_id = request.POST.get('role_user_id')
+        # if project id or editor id not in request or not int
+        if not project_id or not editor_id or not project_id.isdigit() or not editor_id.isdigit():
+            messages.error(request, 'Ошибка. Попробуйте еще раз')
+            return redirect('home')
         # if user not in project editors with this project with active
         editors_count = 0
         is_active_editor_in_project = Project_Editor.objects.filter(project=Project.objects.get(
@@ -516,6 +520,10 @@ def appoint_translator(request):
     if request.method == "POST":
         project_id = request.POST.get('project_id')
         translator_id = request.POST.get('role_user_id')
+
+        if not project_id or not translator_id or not project_id.isdigit() or not translator_id.isdigit():
+            messages.error(request, 'Ошибка. Попробуйте еще раз')
+            return redirect('home')
         
         translators_count = 0
         is_active_translator_in_project = Project_Translator.objects.filter(project=Project.objects.get(
@@ -552,6 +560,10 @@ def dismiss_editor(request):
     if request.method == "POST":
         project_id = request.POST.get('project_id')
         editor_id = request.POST.get('role_user_id')
+        # if project id or editor id not in request or not int
+        if not project_id or not editor_id or not project_id.isdigit() or not editor_id.isdigit():
+            messages.error(request, 'Ошибка. Попробуйте еще раз')
+            return redirect('home')
         Project_Editor.objects.filter(project=Project.objects.get(
             id=project_id), editor=Editor.objects.get(id=editor_id)).update(active=False)
         bot.send_message(Editor.objects.get(id=editor_id).user.tg_id,
@@ -567,6 +579,9 @@ def dismiss_translator(request):
     if request.method == "POST":
         project_id = request.POST.get('project_id')
         translator_id = request.POST.get('role_user_id')
+        if not project_id or not translator_id or not project_id.isdigit() or not translator_id.isdigit():
+            messages.error(request, 'Ошибка. Попробуйте еще раз')
+            return redirect('home')
         Project_Translator.objects.filter(project=Project.objects.get(
             id=project_id), translator=Translator.objects.get(id=translator_id)).update(active=False)
         bot.send_message(Translator.objects.get(id=translator_id).user.tg_id,
