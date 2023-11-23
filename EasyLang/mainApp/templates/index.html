@@ -21,7 +21,7 @@
               <a id="cancelAddTranslator" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
                 Отмена
               </a>
-              <a class="col btn btn-success submit-action-form" href="#" role="button">
+              <a class="col btn btn-success submit-action-form" href="#" role="button" id="ok-btn">
                 Окей
               </a>
         </div>
@@ -48,7 +48,7 @@
               <a id="cancelDeleteTranslator" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
                 Отмена
               </a>
-              <a class="col btn btn-success submit-action-form" href="#" role="button">
+              <a class="col btn btn-success submit-action-form" href="#" role="button" id="ok-btn">
                 Окей
               </a>
         </div>
@@ -75,7 +75,7 @@
               <a id="cancelAddEditor" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
                 Отмена
               </a>
-              <a class="col btn btn-success submit-action-form" href="#" role="button">
+              <a class="col btn btn-success submit-action-form" href="#" role="button" id="ok-btn">
                 Окей
               </a>
         </div>
@@ -102,7 +102,7 @@
               <a id="cancelDeleteEditor" data-toggle="modal" data-target="#actionProjectModal" data-dismiss="modal" class="col btn btn-danger" href="#" role="button">
                 Отмена
               </a>
-              <a class="col btn btn-success submit-action-form" href="#" role="button">
+              <a class="col btn btn-success submit-action-form" href="#" role="button" id="ok-btn">
                 Окей
               </a>
         </div>
@@ -254,6 +254,13 @@
           data = JSON.parse(data);
           for(let i=0;i<data.length;i++){
             $(targ+">.modal-dialog>.modal-content>form>.modal-body>.radio-group").append("<div class='modal-body-title-btn btn submit-action-btn' data-id='"+data[i]["id"]+"' data-project='"+projectId+"' ><p>"+data[i]["name"]+" "+data[i]["surname"]+"</p></div>");
+          }
+          // if no translators or editors disable ok button
+          console.log(data);
+          if(data.length == 0){
+            $(targ+">.modal-dialog>.modal-content>form>.modal-footer>#ok-btn").addClass("disabled");
+          }else{
+            $(targ+">.modal-dialog>.modal-content>form>.modal-footer>#ok-btn").removeClass("disabled");
           }
         }
         
