@@ -191,6 +191,12 @@ def add_new_project(request):
             project_description = form.cleaned_data['project_description']
             project_total_pages_count = form.cleaned_data['project_total_pages_count']
             project_deadline = form.cleaned_data['project_deadline']
+
+            # if project with this name already exists
+            if Project.objects.filter(name=project_name):
+                messages.error(request, 'Проект с таким названием уже существует')
+                return redirect('home')
+
             project = Project(name=project_name, description=project_description, total_pages_count=project_total_pages_count,
                               manager=Manager.objects.get(user=request.user), deadline=project_deadline)
             project.save()
@@ -419,13 +425,13 @@ GROUP BY t.id;"""
     WHERE t.active = 1 AND pt.active = 1
     GROUP BY t.id;"""
 
-    
+
     prc = []
     with connection.cursor() as cursor:
         cursor.execute(query)
         prc = cursor.fetchall()
     prc = dict(prc)
-    
+
     res = []
     for tr in translators:
         translator = list(tr)
@@ -437,13 +443,13 @@ GROUP BY t.id;"""
         res.append({'id': translator[0], 'name': translator[1],
                    'surname': translator[2], 'tg_id': translator[3], 'total_projects': translator[4]})
     return JsonResponse(res, safe=False, json_dumps_params={'ensure_ascii': False})
-    
-    
+
+
 
 
 def project_editors_list(request):
     project_id = request.GET.get('project_id')
-    query = """SELECT e.id, u.name, u.surname, u.tg_id FROM mainApp_editor e  
+    query = """SELECT e.id, u.name, u.surname, u.tg_id FROM mainApp_editor e
         INNER JOIN mainApp_project_editor pe ON pe.editor_id=e.id
         INNER JOIN mainApp_project p ON p.id=pe.project_id
         INNER JOIN mainApp_user u ON u.id = e.user_id
@@ -461,7 +467,7 @@ def project_editors_list(request):
 
 def project_translators_list(request):
     project_id = request.GET.get('project_id')
-    query = """SELECT t.id, u.name, u.surname, u.tg_id FROM mainApp_translator t  
+    query = """SELECT t.id, u.name, u.surname, u.tg_id FROM mainApp_translator t
         INNER JOIN mainApp_project_translator pt ON pt.translator_id=t.id
         INNER JOIN mainApp_project p ON p.id=pt.project_id
         INNER JOIN mainApp_user u ON u.id = t.user_id
@@ -524,7 +530,7 @@ def appoint_translator(request):
         if not project_id or not translator_id or not project_id.isdigit() or not translator_id.isdigit():
             messages.error(request, 'Ошибка. Попробуйте еще раз')
             return redirect('home')
-        
+
         translators_count = 0
         is_active_translator_in_project = Project_Translator.objects.filter(project=Project.objects.get(
             id=project_id), translator=Translator.objects.get(id=translator_id), active=True).count()
@@ -641,7 +647,7 @@ def notify_that_project_finished(request):
 
 def editor_summary(request):
     # Редактору уведомление в пятницу в 17 00, сколько проверить нужно и сколько проверили за неделю
-    query = """SELECT e.id as editor_id, p.id as project_id, u.tg_id, u.name, u.surname FROM mainApp_editor e  
+    query = """SELECT e.id as editor_id, p.id as project_id, u.tg_id, u.name, u.surname FROM mainApp_editor e
         INNER JOIN mainApp_project_editor pe ON pe.editor_id=e.id
         INNER JOIN mainApp_project p ON p.id=pe.project_id
         INNER JOIN mainApp_user u ON u.id = e.user_id"""
@@ -766,7 +772,7 @@ def delete_project(request):
             messages.error(request, 'Проект не найден')
             return redirect(request.META.get('HTTP_REFERER'))
         else:
-            
+
             messages.success(request, 'Проект успешно удален')
             editors = Project_Editor.objects.filter(project=Project.objects.get(id=project_id), active=True)
             for editor in editors:
@@ -780,3 +786,35 @@ def delete_project(request):
     else:
         messages.error(request, 'Вы не авторизованы')
         return redirect(request.META.get('HTTP_REFERER'))
+
+def change_pages_per_day(request, pages_per_day_id):
+    # cremove disapprove from pages andchange comment  with count of pages
+    if request.method == "POST":
+        # if not comment or pages
+        if not request.POST.get('comment') or not request.POST.get('pages_count'):
+            messages.error(request, 'Заполните все поля')
+            return redirect('home')
+        if not Pages_per_day.objects.filter(id=pages_per_day_id):
+            messages.error(request, 'Страница не найдена')
+            return redirect('home')
+
+        # delete disapprove if exists
+        if Disapprove.objects.filter(pages_per_day=Pages_per_day.objects.get(id=pages_per_day_id)):
+            Disapprove.objects.filter(
+                pages_per_day=Pages_per_day.objects.get(id=pages_per_day_id)).delete()
+
+        # delete approve
+        if Approve.objects.filter(pages_per_day=Pages_per_day.objects.get(id=pages_per_day_id)):
+            Approve.objects.filter(
+                pages_per_day=Pages_per_day.objects.get(id=pages_per_day_id)).delete()
+
+        # update pages per day
+
+
+        Pages_per_day.objects.filter(id=pages_per_day_id).update(pages_count=request.POST.get('pages_count'), comment=request.POST.get('comment'))
+        messages.success(request, 'Вы успешно изменили ' +
+                             str(request.POST.get('pages_count')) + ' страниц')
+        bot.send_message(request.user.tg_id, 'Вы успешно изменили ' + str(request.POST.get('pages_count')) + ' страниц в проекте ' + Pages_per_day.objects.get(id=pages_per_day_id).project.name + ' переводчика ' + Pages_per_day.objects.get(
+            id=pages_per_day_id).translator.user.name + ' ' + Pages_per_day.objects.get(id=pages_per_day_id).translator.user.surname + '\nДата перевода: ' + Pages_per_day.objects.get(id=pages_per_day_id).created_at.strftime("%d.%m.%Y %H:%m:%S"))
+        bot.send_message(Pages_per_day.objects.get(id=pages_per_day_id).translator.user.tg_id, 'Редактор ' + request.user.name + ' ' + request.user.surname + ' изменил ' + str(request.POST.get('pages_count')) +
+                         ' страниц в проекте ' + Pages_per_day.objects.get(id=pages_per_day_id).project.name + '\nДата перевода: ' + Pages_per_day.objects.get(id=pages_per_day_id).created_at.strftime("%d.%m.%Y %H:%m:%S"))

@@ -104,12 +104,14 @@ class AddTranslatedPagesForm(forms.Form):
         self.fields['pages_count'].widget=forms.NumberInput(attrs={
             'class': "form-control",
             'placeholder': 'Количество страниц',
+            'id': 'add_pages_count',
             'max': self.max_value
         })
 
     # <div class="detail_card"><div class="detail_card_title">Добавить переведенные страницы</div><div class="detail_card_content"><form action="/projects/{{project.id}}/add_pages/" method="post">{% csrf_token %}<div class="form-group"><label for="pages_count">Количество страниц</label><input type="number" class="form-control" id="pages_count" name="pages_count" placeholder="Количество страниц"></div><button type="submit" class="btn btn-primary">Добавить</button></form></div></div>
     pages_count = forms.IntegerField(
         label='',
+        required=True,
     )
     comment = forms.CharField(
         widget=forms.TextInput(attrs={
@@ -121,5 +123,4 @@ class AddTranslatedPagesForm(forms.Form):
         required=False,
         max_length=500,
     )
-
 

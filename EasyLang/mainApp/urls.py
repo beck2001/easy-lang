@@ -32,4 +32,6 @@ urlpatterns = [
 
     path("end_project", views.end_project, name="end_project"),
     path("delete_project", views.delete_project, name="delete_project"),
+    # change_pages_per_day
+    path("change_pages_per_day/<int:pages_per_day_id>/", views.change_pages_per_day, name="change_pages_per_day"),
 ]
