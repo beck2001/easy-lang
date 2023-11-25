@@ -15,10 +15,10 @@ class UserManager(BaseUserManager):
             raise ValueError('The surname must be set')
         if not password:
             raise ValueError('The password must be set')
-        
+
         user = self.model(tg_id=tg_id, name=name, surname=surname, **extra_fields)
-        
-        
+
+
         user.set_password(password)
         user.save()
         return user
@@ -37,7 +37,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-        
+
 
     tg_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=50)
@@ -52,19 +52,19 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'tg_id'
     REQUIRED_FIELDS = ['name', 'surname']
-    
+
 
     objects = UserManager()
 
     def __str__(self):
         return self.name + ' ' + self.surname
-        
+
 class Manager(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     active = models.BooleanField(default=True)
     def __str__(self):
         return self.user.name + ' ' + self.user.surname
-    
+
 class Project(models.Model):
     name = models.CharField(max_length=70)
     description = models.CharField(max_length=500)
@@ -77,24 +77,24 @@ class Project(models.Model):
         return self.name
 
 class Translator(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     active = models.BooleanField(default=True)
     def __str__(self):
         return self.user.name + ' ' + self.user.surname
 
 class Editor(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     active = models.BooleanField(default=True)
     def __str__(self):
         return self.user.name + ' ' + self.user.surname
-        
+
 
 class Project_Translator(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     translator = models.ForeignKey(Translator, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return self.translator.user.name + ' ' + self.translator.user.surname + ' ' + self.project.name
 
@@ -116,8 +116,8 @@ class Pages_per_day(models.Model):
 
     def __str__(self):
         return self.translator.user.name + ' ' + self.translator.user.surname + ' ' + self.project.name + ' ' + str(self.pages_count)
-    
-    
+
+
 class Approve(models.Model):
     # one to one
     pages_per_day = models.OneToOneField(Pages_per_day, on_delete=models.CASCADE, unique=True)
